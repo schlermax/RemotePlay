@@ -6,7 +6,7 @@ import asyncio
 import websockets
 import pyautogui
 
-SERVER_URL = "wss://your-render-service.onrender.com"
+SERVER_URL = "wss://remoteplay.onrender.com"
 
 async def host_task():
     async with websockets.connect(SERVER_URL) as websocket:
