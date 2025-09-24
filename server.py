@@ -12,10 +12,10 @@ async def handler(websocket):
     role = await websocket.recv()
     if role == "host":
         hosts.add(websocket)
-        print("Host connected")
+        print("Host connected", flush=True)
     elif role == "client":
         clients.add(websocket)
-        print("Client connected")
+        print("Client connected", flush=True)
     try:
         async for message in websocket:
             if role == "client":
