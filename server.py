@@ -44,6 +44,8 @@ async def handler(websocket):
 
             action = data.get("action")
 
+            print(f"PACKET: {data}", flush=True)
+
             # --- Handle role assignment ---
             if action == "role_assignment":
                 role = data.get("role")
