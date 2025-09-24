@@ -1,10 +1,10 @@
 # ~~~ SERVER code ~~~
-# This will not be executed locally. This will be located on the cloud to act as a 
-# relay.
+# Cloud relay server
 
 import asyncio
 import os
 import websockets
+import json
 
 hosts = {}
 clients = {}
@@ -12,7 +12,6 @@ clients = {}
 # --- Heartbeat Task ---
 async def heartbeat():
     while True:
-        # Copy the keys so we don’t modify dicts while iterating
         for ws, name in list(hosts.items()):
             try:
                 await ws.ping()
@@ -29,52 +28,63 @@ async def heartbeat():
 
         await asyncio.sleep(20)  # send ping every 20s
 
+
 # --- Connection Handler ---
 async def handler(websocket):
-    role_and_name = await websocket.recv()
-    role_and_name = role_and_name.split()
-
-    if len(role_and_name) != 2:
-        print("Invalid role/name received", flush=True)
-        return
-    
-    role = role_and_name[0]
-    name = role_and_name[1]
-
-    if role == "host":
-        hosts[websocket] = name
-        print(f"Host connected ({name})", flush=True)
-    elif role == "client":
-        clients[websocket] = name
-        print(f"Client connected ({name})", flush=True)
+    role = None
+    name = None
 
     try:
-        async for message in websocket:
-            if websocket in clients:
-                # Broadcast keypress to all hosts
-                print(f"Client ({name}) sent: {message}", flush=True)
+        async for raw_msg in websocket:
+            try:
+                data = json.loads(raw_msg)
+            except json.JSONDecodeError:
+                print(f"Received non-JSON message: {raw_msg}", flush=True)
+                continue
+
+            action = data.get("action")
+
+            # --- Handle role assignment ---
+            if action == "role_assignment":
+                role = data.get("role")
+                name = data.get("name")
+
+                if role == "host":
+                    hosts[websocket] = name
+                    print(f"Host connected ({name})", flush=True)
+                elif role == "client":
+                    clients[websocket] = name
+                    print(f"Client connected ({name})", flush=True)
+                else:
+                    print(f"Invalid role: {role}", flush=True)
+
+            # --- Handle client messages ---
+            elif action == "message" and websocket in clients:
+                print(f"Client ({clients[websocket]}) sent: {data}", flush=True)
                 for h in list(hosts):
                     try:
-                        await h.send(message)
+                        await h.send(raw_msg)  # forward JSON to hosts
                         print(f"Forwarded to host ({hosts[h]})", flush=True)
                     except Exception as e:
                         print(f"Failed to send to host ({hosts[h]}): {e}", flush=True)
                         hosts.pop(h, None)
+
     except Exception as e:
-        print(f"Error with {role} ({name}): {e}", flush=True)
+        print(f"Error with {role or 'unknown'} ({name or 'unknown'}): {e}", flush=True)
+
     finally:
-        if role == "host":
+        if websocket in hosts:
             print(f"Host disconnected ({hosts.get(websocket)})", flush=True)
             hosts.pop(websocket, None)
-        elif role == "client":
+        elif websocket in clients:
             print(f"Client disconnected ({clients.get(websocket)})", flush=True)
             clients.pop(websocket, None)
+
 
 # --- Main Entrypoint ---
 async def main():
     port = int(os.environ.get("PORT", 8000))
     async with websockets.serve(handler, "0.0.0.0", port, ping_interval=None):
-        # Disable built-in pings, use custom heartbeat instead
         print(f"Server running on port {port}...", flush=True)
         await asyncio.gather(
             asyncio.Future(),  # keep running

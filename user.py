@@ -5,18 +5,25 @@
 import asyncio
 import websockets
 import pyautogui
+import json
 
 SERVER_URL = "wss://remoteplay.onrender.com"
 
 async def host_task():
     name = input("Give yourself a name: ")
     async with websockets.connect(SERVER_URL) as websocket:
-        await websocket.send("host "+name)
+        role_data = {
+            'action': 'role_assignment',
+            'role': 'host', 
+            'name': name
+        }
+        await websocket.send(json.dumps(role_data))
 
         async def listen():
             while True:
                 key = await websocket.recv()
-                pyautogui.press(key)
+                print(key)
+                #pyautogui.press(key)
         async def local_input():
             while True:
                 cmd = input("Enter command (type 'quit' to exit): ")
@@ -28,11 +35,20 @@ async def host_task():
 async def client_task():
     name = input("Give yourself a name: ")
     async with websockets.connect(SERVER_URL) as websocket:
-        await websocket.send("client "+name)
+        role_data = {
+            'action': 'role_assignment',
+            'role': 'client', 
+            'name': name
+        }
+        await websocket.send(json.dumps(role_data))
 
         while True:
             key = input("Press key to send: ")
-            await websocket.send(key)
+            msg_data = {
+                'action': 'message',
+                'message': key
+            }
+            await websocket.send(json.dumps(msg_data))
 
 async def main():
     print("""Hello, hi. I see you're trying to connect to the server.
