@@ -6,7 +6,7 @@ import asyncio
 import websockets
 import pyautogui
 
-SERVER_URL = "wss://your-render-service.onrender.com"
+SERVER_URL = "wss://remoteplay.onrender.com"
 
 async def host_task():
     async with websockets.connect(SERVER_URL) as websocket:
@@ -25,6 +25,8 @@ async def host_task():
         await asyncio.gather(listen(), local_input())
 
 async def client_task():
+    name = input("Give yourself a name: ")
+
     async with websockets.connect(SERVER_URL) as websocket:
         await websocket.send("client")
         while True:
@@ -32,13 +34,20 @@ async def client_task():
             await websocket.send(key)
 
 async def main():
-    role = input("Are you a host or client? ").strip().lower()
+    print("""Hello, hi. I see you're trying to connect to the server.
+If you are hosting, that means the clients will be able press some keys for you.
+If you are a client, that means you will be pressing keys for the host.""")
+    role = input("Are you a HOST or CLIENT: ").strip().lower()
+
+    while role != "host" and role != "client":
+        print(role, "isn't a valid role. Please type 'host' or 'client'.")
+        role = input("Are you a host or client? ").strip().lower()
+    
+    print("Connecting to relay --", SERVER_URL)
 
     if role == "host":
         await host_task()
     elif role == "client":
         await client_task()
-    else:
-        print("Invalid role. Please restart and type 'host' or 'client'.")
 
 asyncio.run(main())
