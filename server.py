@@ -59,6 +59,9 @@ async def handler(websocket):
                     print(f"Client connected ({name})", flush=True)
                 else:
                     print(f"Invalid role: {role}", flush=True)
+                
+                print(f"Hosts: {hosts}", flush=True)
+                print(f"Clients: {clients}", flush=True)
 
             # --- Handle client messages ---
             elif action == "message" and websocket in clients:
