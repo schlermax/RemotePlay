@@ -10,8 +10,9 @@ SERVER_URL = "wss://remoteplay.onrender.com"
 NAME = ''
 
 async def host_task():
+    name = input("Give yourself a name: ")
     async with websockets.connect(SERVER_URL) as websocket:
-        await websocket.send("host "+NAME)
+        await websocket.send("host "+name)
 
         async def listen():
             while True:
@@ -26,8 +27,9 @@ async def host_task():
         await asyncio.gather(listen(), local_input())
 
 async def client_task():
+    name = input("Give yourself a name: ")
     async with websockets.connect(SERVER_URL) as websocket:
-        await websocket.send("client "+NAME)
+        await websocket.send("client "+name)
 
         while True:
             key = input("Press key to send: ")
@@ -42,8 +44,6 @@ If you are a client, that means you will be pressing keys for the host.""")
     while role != "host" and role != "client":
         print(role, "isn't a valid role. Please type 'host' or 'client'.")
         role = input("Are you a host or client? ").strip().lower()
-    
-    NAME = input("Give yourself a name: ")
 
     print("Connecting to relay --", SERVER_URL)
 
