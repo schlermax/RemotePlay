@@ -43,15 +43,14 @@ async def client_task():
         await websocket.send(json.dumps(role_data))
 
         while True:
-            key = input("Press key to send: ")
-            msg_data = {
-                'action': 'message',
-                'message': key
-            }
-            try:
-                await websocket.send(json.dumps(msg_data))
-            except Exception as e:
-                print("Send failed:", e)
+            # key = input("Press key to send: ")
+            # msg_data = {
+            #     'action': 'message',
+            #     'message': key
+            # }
+            key = await asyncio.to_thread(input, "Press key to send: ")
+            msg_data = {'action': 'message', 'message': key}
+            await websocket.send(json.dumps(msg_data))
 
 async def main():
     print("""Hello, hi. I see you're trying to connect to the server.
