@@ -48,7 +48,10 @@ async def client_task():
                 'action': 'message',
                 'message': key
             }
-            await websocket.send(json.dumps(msg_data))
+            try:
+                await websocket.send(json.dumps(msg_data))
+            except Exception as e:
+                print("Send failed:", e)
 
 async def main():
     print("""Hello, hi. I see you're trying to connect to the server.
