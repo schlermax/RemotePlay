@@ -7,7 +7,6 @@ import websockets
 import pyautogui
 
 SERVER_URL = "wss://remoteplay.onrender.com"
-NAME = ''
 
 async def host_task():
     name = input("Give yourself a name: ")
