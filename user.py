@@ -42,6 +42,8 @@ If you are a client, that means you will be pressing keys for the host.""")
     while role != "host" and role != "client":
         print(role, "isn't a valid role. Please type 'host' or 'client'.")
         role = input("Are you a host or client? ").strip().lower()
+    
+    print("Connecting to relay --", SERVER_URL)
 
     if role == "host":
         await host_task()
