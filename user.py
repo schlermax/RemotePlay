@@ -64,7 +64,7 @@ def pick_keys():
             if key == '=':
                 break
             ALLOWED_KEYS.add(key)
-            print(ALLOWED_KEYS)
+            print("Allowed keys:",ALLOWED_KEYS)
     elif pick == '2':
         print("Just start presssing keys to remove.")
         print("Press '=' when you are finished.")
@@ -75,7 +75,7 @@ def pick_keys():
                 break
             if key in ALLOWED_KEYS:
                 ALLOWED_KEYS.remove(key)
-                print(ALLOWED_KEYS)
+                print("Allowed keys:",ALLOWED_KEYS)
 
 
 

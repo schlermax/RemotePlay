@@ -56,7 +56,10 @@ async def handler(websocket):
                     print(f"Host connected ({name})", flush=True)
                     for h in list(hosts):
                         try:
-                            data = {'action': 'all_clients', 'clients': hosts.values()}
+                            nms = []
+                            for h in hosts:
+                                nms.append(hosts[h])
+                            data = {'action': 'all_clients', 'clients': nms}
                             await h.send(json.dumps(data))  # forward JSON to hosts
                             print(f"Forwarded to host ({hosts[h]})", flush=True)
                         except Exception as e:
