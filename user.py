@@ -73,8 +73,9 @@ def pick_keys():
             key = key.name
             if key == '=':
                 break
-            ALLOWED_KEYS.remove(key)
-            print(ALLOWED_KEYS)
+            if key in ALLOWED_KEYS:
+                ALLOWED_KEYS.remove(key)
+                print(ALLOWED_KEYS)
 
 
 
@@ -113,7 +114,7 @@ This will also pull up a features menu.""")
                         print(data["message"])
                     
                     elif action == "all_clients":
-                        nms = data["clients"].values()
+                        nms = data["clients"]
                         for nm in nms:
                             ALLOWED_CLIENTS.add(nm)
 
