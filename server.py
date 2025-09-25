@@ -59,7 +59,7 @@ async def handler(websocket):
                             nms = []
                             for c in clients:
                                 nms.append(clients[c])
-                            data = {'action': 'all_clients', 'clients': nms}
+                            data = {'action': 'all_clients', 'clients': nms, 'sender':'done'}
                             await h.send(json.dumps(data))  # forward JSON to hosts
                             print(f"Forwarded to host ({hosts[h]})", flush=True)
                         except Exception as e:
@@ -71,7 +71,7 @@ async def handler(websocket):
                     print(f"Client connected ({name})", flush=True)
                     for h in list(hosts):
                         try:
-                            data = {'action': 'new_client', 'client': name}
+                            data = {'action': 'new_client', 'client': name, 'sender':'done'}
                             await h.send(json.dumps(data))  # forward JSON to hosts
                             print(f"Forwarded to host ({hosts[h]})", flush=True)
                         except Exception as e:

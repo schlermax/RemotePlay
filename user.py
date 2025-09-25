@@ -109,7 +109,7 @@ This will also pull up a features menu.""")
                 action = data.get("action")
                 sender = data.get("sender")
 
-                if sender in ALLOWED_CLIENTS:
+                if sender in ALLOWED_CLIENTS or sender == 'done':
                     if action == "message":
                         print(data["message"])
                     
