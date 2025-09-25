@@ -19,12 +19,13 @@ def pick_clients():
     print("Current clients I listen to:\n", ALLOWED_CLIENTS)
     print("Current clients I ignore:\n", IGNORED_CLIENTS)
     print("""
- 1. Listen to more clients
- 2. Ignore more clients
- 3. Done.""")
+<<<CLIENT SELECT>>>
+ 4. Listen to more clients
+ 5. Ignore more clients
+ 6. Done.""")
     pick = input("Type an option: ")
 
-    if pick == '1':
+    if pick == '4':
         print(IGNORED_CLIENTS)
         print("Type the client's name to add and press ENTER.")
         print("Type 'done' and press ENTER to exit.")
@@ -35,7 +36,8 @@ def pick_clients():
                 ALLOWED_CLIENTS.add(person)
                 print("Allowed Clients:", ALLOWED_CLIENTS)
                 print("Ignored Clients:", IGNORED_CLIENTS)
-    elif pick == '2':
+            person = input('Client name: ')
+    elif pick == '5':
         print(ALLOWED_CLIENTS)
         print("Type the client's name to ignore and press ENTER.")
         print("Type 'done' and press ENTER to exit.")
@@ -46,16 +48,18 @@ def pick_clients():
                 IGNORED_CLIENTS.add(person)
                 print("Allowed Clients:", ALLOWED_CLIENTS)
                 print("Ignored Clients:", IGNORED_CLIENTS)
+            person = input('Client name: ')
 
 def pick_keys():
     print("Current keys listened for:\n", ALLOWED_KEYS)
     print("""
- 1. Add keys
- 2. Remove keys
- 3. Done.""")
+$$$ KEY SELECT $$$
+ 4. Add keys
+ 5. Remove keys
+ 6. Done.""")
     pick = input("Type an option: ")
 
-    if pick == '1':
+    if pick == '4':
         print("Just start presssing keys to add.")
         print("Press '=' when you are finished.")
         while True:
@@ -65,7 +69,7 @@ def pick_keys():
                 break
             ALLOWED_KEYS.add(key)
             print("Allowed keys:",ALLOWED_KEYS)
-    elif pick == '2':
+    elif pick == '5':
         print("Just start presssing keys to remove.")
         print("Press '=' when you are finished.")
         while True:
@@ -100,7 +104,7 @@ This will also pull up a features menu.""")
         async def listen():
             while True:
                 raw_msg = await websocket.recv()
-                print(raw_msg)
+                #print(raw_msg)
                 try:
                     data = json.loads(raw_msg)
                 except json.JSONDecodeError:
@@ -159,9 +163,10 @@ menu is open, you ignore clients.
                                 pick_keys()
                         if choice != '3':
                             print("""
+~~~ Feature Menu ~~~
  1. Pick which clients I listen to
  2. Pick which keys I listen to
- 3. Close menu
+ 3. Close menu and RESUME
 """)
         
         await asyncio.gather(listen(), local_input())
