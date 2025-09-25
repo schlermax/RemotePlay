@@ -117,10 +117,12 @@ This will also pull up a features menu.""")
                         nms = data["clients"]
                         for nm in nms:
                             ALLOWED_CLIENTS.add(nm)
+                        print("Allowed clients:", ALLOWED_CLIENTS)
 
                     elif action == "new_client":
                         nm = data['client']
                         ALLOWED_CLIENTS.add(nm)
+                        print("Allowed clients:", ALLOWED_CLIENTS)
                     
                     elif action == "keystroke":
                         key = data.get("key")
