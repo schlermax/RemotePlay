@@ -12,12 +12,40 @@ SERVER_URL = "wss://remoteplay.onrender.com"
 
 ALLOWED_KEYS = {'up', 'down', 'left', 'right', 'z', 'x', 'c'}
 
-CLIENTS = {}
 ALLOWED_CLIENTS = {}
 IGNORED_CLIENTS = {}
 
 def pick_clients():
-    pass
+    print("Current clients I listen to:\n", ALLOWED_CLIENTS)
+    print("Current clients I ignore:\n", IGNORED_CLIENTS)
+    print("""
+ 1. Listen to more clients
+ 2. Ignore more clients
+ 3. Done.""")
+    pick = input("Type an option: ")
+
+    if pick == '1':
+        print(IGNORED_CLIENTS)
+        print("Type the client's name to add and press ENTER.")
+        print("Type 'done' and press ENTER to exit.")
+        person = input('Client name: ')
+        while person != 'done':
+            if person in IGNORED_CLIENTS:
+                IGNORED_CLIENTS.remove(person)
+                ALLOWED_CLIENTS.add(person)
+                print("Allowed Clients:", ALLOWED_CLIENTS)
+                print("Ignored Clients:", IGNORED_CLIENTS)
+    elif pick == '2':
+        print(ALLOWED_CLIENTS)
+        print("Type the client's name to ignore and press ENTER.")
+        print("Type 'done' and press ENTER to exit.")
+        person = input('Client name: ')
+        while person != 'done':
+            if person in ALLOWED_CLIENTS:
+                ALLOWED_CLIENTS.remove(person)
+                IGNORED_CLIENTS.add(person)
+                print("Allowed Clients:", ALLOWED_CLIENTS)
+                print("Ignored Clients:", IGNORED_CLIENTS)
 
 def pick_keys():
     print("Current keys listened for:\n", ALLOWED_KEYS)
@@ -53,6 +81,9 @@ def pick_keys():
 
 async def host_task():
     name = input("Give yourself a name: ")
+    while name == "" or name == 'done':
+        print("Not that name.")
+        name = input("Give yourself a name: ")
     async with websockets.connect(SERVER_URL) as websocket:
         role_data = {
             'action': 'role_assignment',
@@ -75,18 +106,31 @@ This will also pull up a features menu.""")
                     print(f"Received non-JSON message: {raw_msg}", flush=True)
                 
                 action = data.get("action")
-                if action == "message":
-                    print(data["message"])
-                elif action == "keystroke":
-                    key_event = data.get("key")
-                    key = key_event.name
-                    press = key_event.event_type
+                sender = data.get("sender")
 
-                    if key in ALLOWED_KEYS:
-                        if press == "down":
-                            pyautogui.keyDown(key)
-                        elif press == 'up':
-                            pyautogui.keyUp(key)
+                if sender in ALLOWED_CLIENTS:
+                    if action == "message":
+                        print(data["message"])
+                    
+                    elif action == "all_clients":
+                        nms = data["clients"].values()
+                        for nm in nms:
+                            ALLOWED_CLIENTS.add(nm)
+
+                    elif action == "new_client":
+                        nm = data['client']
+                        ALLOWED_CLIENTS.add(nm)
+                    
+                    elif action == "keystroke":
+                        key_event = data.get("key")
+                        key = key_event.name
+                        press = key_event.event_type
+
+                        if key in ALLOWED_KEYS:
+                            if press == "down":
+                                pyautogui.keyDown(key)
+                            elif press == 'up':
+                                pyautogui.keyUp(key)
         async def local_input():
             while True:
                 keystroke = await asyncio.to_thread(keyboard.read_event)
@@ -108,7 +152,7 @@ menu is open, you ignore clients.
                         choice = input('Type an option number: ')
                         match choice:
                             case '1':
-                                pass
+                                pick_clients()
                             case '2':
                                 pick_keys()
                         if choice != '3':
@@ -122,6 +166,9 @@ menu is open, you ignore clients.
 
 async def client_task():
     name = input("Give yourself a name: ")
+    while name == "" or name == 'done':
+        print("Not that name.")
+        name = input("Give yourself a name: ")
     async with websockets.connect(SERVER_URL) as websocket:
         role_data = {
             'action': 'role_assignment',
@@ -139,7 +186,7 @@ You can mute your keystrokes by pressing '-'.""")
             # await websocket.send(json.dumps(msg_data))
             paused = False
             keystroke = await asyncio.to_thread(keyboard.read_event)
-            keystroke_data = {'action': 'keystroke', 'key':keystroke}
+            keystroke_data = {'action': 'keystroke', 'key':keystroke, 'sender':name}
             if keystroke.name == '-':
                 paused = True
                 print("You have muted your keystrokes. Press '=' to unmute.")

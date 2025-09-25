@@ -54,9 +54,26 @@ async def handler(websocket):
                 if role == "host":
                     hosts[websocket] = name
                     print(f"Host connected ({name})", flush=True)
+                    for h in list(hosts):
+                        try:
+                            data = {'action': 'all_clients', 'clients': hosts.copy()}
+                            await h.send(json.dumps(data))  # forward JSON to hosts
+                            print(f"Forwarded to host ({hosts[h]})", flush=True)
+                        except Exception as e:
+                            print(f"Failed to send to host ({hosts[h]}): {e}", flush=True)
+                            hosts.pop(h, None)
+                
                 elif role == "client":
                     clients[websocket] = name
                     print(f"Client connected ({name})", flush=True)
+                    for h in list(hosts):
+                        try:
+                            data = {'action': 'new_client', 'client': name}
+                            await h.send(json.dumps(data))  # forward JSON to hosts
+                            print(f"Forwarded to host ({hosts[h]})", flush=True)
+                        except Exception as e:
+                            print(f"Failed to send to host ({hosts[h]}): {e}", flush=True)
+                            hosts.pop(h, None)
                 else:
                     print(f"Invalid role: {role}", flush=True)
                 
@@ -65,6 +82,17 @@ async def handler(websocket):
 
             # --- Handle client messages ---
             elif action == "message" and websocket in clients:
+                print(f"Client ({clients[websocket]}) sent: {data}", flush=True)
+                for h in list(hosts):
+                    try:
+                        await h.send(raw_msg)  # forward JSON to hosts
+                        print(f"Forwarded to host ({hosts[h]})", flush=True)
+                    except Exception as e:
+                        print(f"Failed to send to host ({hosts[h]}): {e}", flush=True)
+                        hosts.pop(h, None)
+            
+            # --- Handle client key strokes ---
+            elif action == "key" and websocket in clients:
                 print(f"Client ({clients[websocket]}) sent: {data}", flush=True)
                 for h in list(hosts):
                     try:
