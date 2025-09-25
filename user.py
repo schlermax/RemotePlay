@@ -12,8 +12,8 @@ SERVER_URL = "wss://remoteplay.onrender.com"
 
 ALLOWED_KEYS = {'up', 'down', 'left', 'right', 'z', 'x', 'c'}
 
-ALLOWED_CLIENTS = {}
-IGNORED_CLIENTS = {}
+ALLOWED_CLIENTS = set()
+IGNORED_CLIENTS = set()
 
 def pick_clients():
     print("Current clients I listen to:\n", ALLOWED_CLIENTS)
