@@ -12,6 +12,45 @@ SERVER_URL = "wss://remoteplay.onrender.com"
 
 ALLOWED_KEYS = {'up', 'down', 'left', 'right', 'z', 'x', 'c'}
 
+CLIENTS = {}
+ALLOWED_CLIENTS = {}
+IGNORED_CLIENTS = {}
+
+def pick_clients():
+    pass
+
+def pick_keys():
+    print("Current keys listened for:\n", ALLOWED_KEYS)
+    print("""
+ 1. Add keys
+ 2. Remove keys
+ 3. Done.""")
+    pick = input("Type an option: ")
+
+    if pick == '1':
+        print("Just start presssing keys to add.")
+        print("Press '=' when you are finished.")
+        while True:
+            key = keyboard.read_event()
+            key = key.name
+            if key == '=':
+                break
+            ALLOWED_KEYS.add(key)
+            print(ALLOWED_KEYS)
+    elif pick == '2':
+        print("Just start presssing keys to remove.")
+        print("Press '=' when you are finished.")
+        while True:
+            key = keyboard.read_event()
+            key = key.name
+            if key == '=':
+                break
+            ALLOWED_KEYS.remove(key)
+            print(ALLOWED_KEYS)
+
+
+
+
 async def host_task():
     name = input("Give yourself a name: ")
     async with websockets.connect(SERVER_URL) as websocket:
@@ -21,6 +60,10 @@ async def host_task():
             'name': name
         }
         await websocket.send(json.dumps(role_data))
+        print("""You have successfully connected to the relay.
+client keystrokes will now be sent to you.
+You can block keystrokes by pressing '-'.
+This will also pull up a features menu.""")
 
         async def listen():
             while True:
@@ -46,9 +89,34 @@ async def host_task():
                             pyautogui.keyUp(key)
         async def local_input():
             while True:
-                cmd = input("Enter command (type 'quit' to exit): ")
-                if cmd == "quit":
-                    break
+                keystroke = await asyncio.to_thread(keyboard.read_event)
+                if keystroke.name == '-':
+                    print("""
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~ ~~ ~   FEATURES   MENU   ~ ~~ ~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Welcome to the features menu. Type the number of
+the option you want and press ENTER. While this
+menu is open, you ignore clients.
+                          
+ 1. Pick which clients I listen to
+ 2. Pick which keys I listen to
+ 3. Close menu                        
+""")
+                    choice = ''
+                    while choice != '3':
+                        choice = input('Type an option number: ')
+                        match choice:
+                            case '1':
+                                pass
+                            case '2':
+                                pick_keys()
+                        if choice != '3':
+                            print("""
+ 1. Pick which clients I listen to
+ 2. Pick which keys I listen to
+ 3. Close menu
+""")
         
         await asyncio.gather(listen(), local_input())
 
