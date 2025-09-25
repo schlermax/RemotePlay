@@ -122,9 +122,8 @@ This will also pull up a features menu.""")
                         ALLOWED_CLIENTS.add(nm)
                     
                     elif action == "keystroke":
-                        key_event = data.get("key")
-                        key = key_event.name
-                        press = key_event.event_type
+                        key = data.get("key")
+                        press = data.get("press")
 
                         if key in ALLOWED_KEYS:
                             if press == "down":
@@ -186,7 +185,7 @@ You can mute your keystrokes by pressing '-'.""")
             # await websocket.send(json.dumps(msg_data))
             paused = False
             keystroke = await asyncio.to_thread(keyboard.read_event)
-            keystroke_data = {'action': 'keystroke', 'key':keystroke, 'sender':name}
+            keystroke_data = {'action': 'keystroke', 'key':keystroke.name, 'press':keystroke.event_type, 'sender':name}
             if keystroke.name == '-':
                 paused = True
                 print("You have muted your keystrokes. Press '=' to unmute.")
