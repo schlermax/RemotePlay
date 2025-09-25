@@ -182,21 +182,43 @@ async def client_task():
 Your keystrokes will now be sent to the host(s).
 You can mute your keystrokes by pressing '-'.""")
 
+        paused = False
+        keys_down = set()
+
         while True:
             # key = await asyncio.to_thread(input, "Press key to send: ")
             # msg_data = {'action': 'message', 'message': key}
             # await websocket.send(json.dumps(msg_data))
-            paused = False
             keystroke = await asyncio.to_thread(keyboard.read_event)
-            keystroke_data = {'action': 'keystroke', 'key':keystroke.name, 'press':keystroke.event_type, 'sender':name}
-            if keystroke.name == '-':
+            key = keystroke.name
+            event_type = keystroke.event_type
+
+            if key == '-':
                 paused = True
-                print("You have muted your keystrokes. Press '=' to unmute.")
-            elif keystroke.name == '=':
+                print("Muted. Press '=' to unmute.")
+                continue
+            elif key == '=':
                 paused = False
-                print("You have unmuted your keystrokes. Press '-' to mute.")
-            elif not paused:
-                await websocket.send(json.dumps(keystroke_data))
+                print("Unmuted. Press '-' to mute.")
+                continue
+            elif paused:
+                continue
+
+            # Only send 'down' if it's a new press
+            if event_type == "down":
+                if key in keys_down:
+                    continue  # ignore repeated 'down'
+                keys_down.add(key)
+            elif event_type == "up":
+                keys_down.discard(key)  # mark key as released
+
+            keystroke_data = {
+                'action': 'keystroke',
+                'key': key,
+                'press': event_type,
+                'sender': name
+            }
+            await websocket.send(json.dumps(keystroke_data))
 
 async def main():
     print("""Hello, hi. I see you're trying to connect to the server.
