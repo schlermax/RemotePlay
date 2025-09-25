@@ -95,7 +95,7 @@ async def handler(websocket):
                         hosts.pop(h, None)
             
             # --- Handle client key strokes ---
-            elif action == "key" and websocket in clients:
+            elif action == "keystroke" and websocket in clients:
                 print(f"Client ({clients[websocket]}) sent: {data}", flush=True)
                 for h in list(hosts):
                     try:
